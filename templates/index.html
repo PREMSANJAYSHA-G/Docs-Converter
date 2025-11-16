@@ -103,7 +103,7 @@ input[type="file"] { display: none; }
     <form id="uploadForm" action="/convert" method="POST" enctype="multipart/form-data">
         <div class="upload-wrapper">
             <label for="files" class="upload-box" id="dropArea">
-                <p>Drag & Drop your Word / PDF files</p>
+                <p>Drag & Drop your Word / PDF files anywhere on page</p>
                 <p><strong>or click to upload</strong></p>
             </label>
             <input type="file" id="files" multiple>
@@ -121,18 +121,26 @@ const uploadForm = document.getElementById("uploadForm");
 
 let selectedFiles = []; // Store all selected files
 
-// Handle clicks & drag events
+// Handle clicks & drag events on dropArea
 dropArea.addEventListener("click", e => { e.preventDefault(); inputFile.click(); });
-dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.style.background = "rgba(255,255,255,0.9)"; });
-dropArea.addEventListener("dragleave", () => { dropArea.style.background = "rgba(255,255,255,0.5)"; });
-dropArea.addEventListener("drop", e => {
+inputFile.addEventListener("change", e => handleNewFiles(e.target.files));
+
+// Make the **whole page** a drop target
+document.addEventListener("dragover", function(e) {
+    e.preventDefault();
+    dropArea.style.background = "rgba(255,255,255,0.9)";
+});
+document.addEventListener("dragleave", function(e) {
+    e.preventDefault();
+    dropArea.style.background = "rgba(255,255,255,0.5)";
+});
+document.addEventListener("drop", function(e) {
     e.preventDefault();
     handleNewFiles(e.dataTransfer.files);
     dropArea.style.background = "rgba(255,255,255,0.5)";
 });
-inputFile.addEventListener("change", e => handleNewFiles(e.target.files));
 
-// Add new files
+// Add new files to selectedFiles array
 function handleNewFiles(files) {
     for (let i = 0; i < files.length; i++) {
         if (!selectedFiles.some(f => f.name === files[i].name && f.size === files[i].size)) {
