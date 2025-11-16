@@ -65,6 +65,16 @@ h2 { font-size: 28px; font-weight: 600; color: #4a148c; }
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.file-badge button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
 }
 input[type="file"] { display: none; }
 .btn {
@@ -111,10 +121,8 @@ const uploadForm = document.getElementById("uploadForm");
 
 let selectedFiles = []; // Store all selected files
 
-// Click triggers file selection
+// Handle clicks & drag events
 dropArea.addEventListener("click", e => { e.preventDefault(); inputFile.click(); });
-
-// Drag & drop
 dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.style.background = "rgba(255,255,255,0.9)"; });
 dropArea.addEventListener("dragleave", () => { dropArea.style.background = "rgba(255,255,255,0.5)"; });
 dropArea.addEventListener("drop", e => {
@@ -122,13 +130,11 @@ dropArea.addEventListener("drop", e => {
     handleNewFiles(e.dataTransfer.files);
     dropArea.style.background = "rgba(255,255,255,0.5)";
 });
-
-// Handle new file selection
 inputFile.addEventListener("change", e => handleNewFiles(e.target.files));
 
+// Add new files
 function handleNewFiles(files) {
     for (let i = 0; i < files.length; i++) {
-        // Avoid duplicates
         if (!selectedFiles.some(f => f.name === files[i].name && f.size === files[i].size)) {
             selectedFiles.push(files[i]);
         }
@@ -136,20 +142,34 @@ function handleNewFiles(files) {
     updateFileList();
 }
 
-// Update file badges
+// Update UI and add remove buttons
 function updateFileList() {
     fileList.innerHTML = "";
-    for (let i = 0; i < selectedFiles.length; i++) {
+    selectedFiles.forEach((file, index) => {
         const span = document.createElement("span");
         span.className = "file-badge";
-        span.textContent = selectedFiles[i].name;
+        span.textContent = file.name;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "✖";
+        removeBtn.addEventListener("click", () => {
+            selectedFiles.splice(index, 1); // remove file
+            updateFileList();
+        });
+
+        span.appendChild(removeBtn);
         fileList.appendChild(span);
-    }
+    });
 }
 
-// Submit all selected files via FormData
+// Handle form submit
 uploadForm.addEventListener("submit", e => {
     e.preventDefault();
+    if(selectedFiles.length === 0){
+        alert("Please select at least one file to convert.");
+        return;
+    }
+
     const formData = new FormData();
     selectedFiles.forEach(file => formData.append("files[]", file));
 
@@ -164,9 +184,11 @@ uploadForm.addEventListener("submit", e => {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-        selectedFiles = []; // Reset after download
+
+        // Reset selection after download
+        selectedFiles = [];
         updateFileList();
-        inputFile.value = ""; // reset input
+        inputFile.value = "";
     });
 });
 </script>
