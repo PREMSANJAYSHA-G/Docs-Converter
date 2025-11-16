@@ -1,0 +1,4 @@
+Flask
+docx2pdf
+python-docx
+pdfplumber
